@@ -265,13 +265,13 @@ export const VISITOR_STATS: StatCard[] = [
 ];
 
 export const DAILY_VISITS: DailyVisit[] = [
-  { day: 'Senin', visits: 0 },
-  { day: 'Selasa', visits: 0 },
-  { day: 'Rabu', visits: 0 },
-  { day: 'Kamis', visits: 0 },
-  { day: 'Jumat', visits: 0 },
-  { day: 'Sabtu', visits: 0 },
-  { day: 'Minggu', visits: 0 },
+  { day: 'Senin', visits: 1240 },
+  { day: 'Selasa', visits: 1560 },
+  { day: 'Rabu', visits: 1320 },
+  { day: 'Kamis', visits: 1840 },
+  { day: 'Jumat', visits: 2100 },
+  { day: 'Sabtu', visits: 950 },
+  { day: 'Minggu', visits: 680 },
 ];
 
 // ============================================================

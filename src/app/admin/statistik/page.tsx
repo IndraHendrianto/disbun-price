@@ -55,12 +55,9 @@ export default function StatistikPage() {
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 opacity-60">
-        {/* Weekly Trend Line Chart */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* Daily Trend Line Chart */}
         <div className="bg-white rounded-xl border border-[var(--border-light)] overflow-hidden shadow-sm relative">
-           <div className="absolute inset-0 bg-white/40 flex items-center justify-center z-10 backdrop-blur-[1px]">
-             <span className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs font-bold border border-orange-200">Segera Datang</span>
-           </div>
           <div className="px-6 py-4 border-b border-[var(--border-light)]">
             <h2 className="text-base font-bold text-[var(--text-primary)]">Tren Kunjungan Harian</h2>
             <p className="text-xs text-[var(--text-tertiary)]">7 hari terakhir</p>
@@ -69,42 +66,46 @@ export default function StatistikPage() {
             <svg viewBox="0 0 500 200" className="w-full h-auto" preserveAspectRatio="xMidYMid meet">
               <defs>
                 <linearGradient id="visitGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#13ec13" stopOpacity="0.25" />
-                  <stop offset="100%" stopColor="#13ec13" stopOpacity="0.02" />
+                  <stop offset="0%" stopColor="#10b981" stopOpacity="0.2" />
+                  <stop offset="100%" stopColor="#10b981" stopOpacity="0.01" />
                 </linearGradient>
               </defs>
 
               {/* Grid */}
               {[0, 1, 2, 3].map((i) => (
-                <line key={i} x1="40" y1={30 + i * 45} x2="470" y2={30 + i * 45} stroke="#e8f0e8" strokeWidth="0.5" strokeDasharray="3 3" />
+                <line key={i} x1="40" y1={30 + i * 45} x2="460" y2={30 + i * 45} stroke="#f0fdf4" strokeWidth="1" />
               ))}
 
-              {/* Area */}
-              <path
-                d="M 80 140 L 170 100 L 260 75 L 350 82 L 440 55 L 440 170 L 80 170 Z"
-                fill="url(#visitGradient)"
-              />
+              {(() => {
+                const padding = 50;
+                const width = 400;
+                const height = 140;
+                const startX = 50;
+                const startY = 170;
+                
+                const points = DAILY_VISITS.map((d, i) => ({
+                  x: startX + (i / (DAILY_VISITS.length - 1)) * width,
+                  y: startY - (d.visits / maxVisits) * height,
+                  visits: d.visits
+                }));
 
-              {/* Line */}
-              <polyline
-                points="80,140 170,100 260,75 350,82 440,55"
-                fill="none"
-                stroke="#13ec13"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
+                const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+                const areaPath = `${linePath} L ${points[points.length - 1].x} ${startY} L ${points[0].x} ${startY} Z`;
 
-              {/* Data points */}
-              {[
-                [80, 140], [170, 100], [260, 75], [350, 82], [440, 55]
-              ].map(([cx, cy], i) => (
-                <circle key={i} cx={cx} cy={cy} r="4" fill="white" stroke="#13ec13" strokeWidth="2" />
-              ))}
+                return (
+                  <>
+                    <path d={areaPath} fill="url(#visitGradient)" />
+                    <path d={linePath} fill="none" stroke="#10b981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                    {points.map((p, i) => (
+                      <circle key={i} cx={p.x} cy={p.y} r="4" fill="white" stroke="#10b981" strokeWidth="2.5" />
+                    ))}
+                  </>
+                );
+              })()}
 
               {/* X labels */}
               {DAILY_VISITS.map((w, i) => (
-                <text key={i} x={50 + i * 65} y="192" textAnchor="middle" className="fill-[var(--text-tertiary)]" fontSize="9">
+                <text key={i} x={50 + (i / (DAILY_VISITS.length - 1)) * 400} y="192" textAnchor="middle" className="fill-[var(--text-tertiary)]" fontSize="10" fontWeight="500">
                   {w.day}
                 </text>
               ))}
@@ -114,9 +115,6 @@ export default function StatistikPage() {
 
         {/* Bar Chart */}
         <div className="bg-white rounded-xl border border-[var(--border-light)] overflow-hidden shadow-sm relative">
-           <div className="absolute inset-0 bg-white/40 flex items-center justify-center z-10 backdrop-blur-[1px]">
-             <span className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs font-bold border border-orange-200">Segera Datang</span>
-           </div>
           <div className="px-6 py-4 border-b border-[var(--border-light)]">
             <h2 className="text-base font-bold text-[var(--text-primary)]">Volume Kunjungan</h2>
             <p className="text-xs text-[var(--text-tertiary)]">Per hari</p>
@@ -126,15 +124,15 @@ export default function StatistikPage() {
               {DAILY_VISITS.map((week, idx) => (
                 <div key={idx} className="flex-1 flex flex-col items-center gap-2">
                   <span className="text-[10px] font-bold text-[var(--text-primary)]">
-                    {(week.visits / 1000).toFixed(1)}K
+                    {week.visits >= 1000 ? `${(week.visits / 1000).toFixed(1)}K` : week.visits}
                   </span>
                   <div
                     className="w-full rounded-t-lg bg-gradient-to-t from-emerald-500 to-green-400 transition-all duration-500 hover:from-emerald-600 hover:to-green-500 cursor-pointer relative group"
-                    style={{ height: `${(week.visits / maxVisits) * 100}%` }}
+                    style={{ height: `${Math.max(5, (week.visits / maxVisits) * 100)}%` }}
                   >
                     {/* Tooltip on hover */}
-                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                      {week.visits.toLocaleString()} kunjungan
+                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-20">
+                      {week.visits.toLocaleString('id-ID')} kunjungan
                     </div>
                   </div>
                   <span className="text-[10px] text-[var(--text-tertiary)]">{week.day}</span>
