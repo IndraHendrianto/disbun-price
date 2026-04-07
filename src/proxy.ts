@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   // Check for the auth-token cookie
   const authToken = request.cookies.get('auth-token')?.value;
 
-  // Paths that require authentications
+  // Paths that require authentication
   const isAuthRoute = request.nextUrl.pathname.startsWith('/admin');
 
   // If the user is trying to access a protected route and doesn't have a token, redirect to login
