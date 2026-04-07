@@ -91,10 +91,6 @@ export default function DashboardHome() {
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-sm text-white/90 text-xs font-medium mb-6">
-              <span className="material-symbols-outlined text-sm">update</span>
-              Update Global: {LAST_UPDATE}
-            </div>
             <h1 className="text-3xl lg:text-4xl font-extrabold text-white mb-4 leading-tight">
               Dashboard Harga Komoditas
             </h1>
@@ -102,22 +98,6 @@ export default function DashboardHome() {
               Pantauan real-time harga pasar unggulan sektor Hortikultura, Perkebunan, dan Bibit Tanaman
               di wilayah Sulawesi Tenggara. Data diperbarui secara berkala oleh Dinas Perkebunan dan Hortikultura.
             </p>
-          </div>
-
-          {/* Quick stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-10">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-              <p className="text-white/60 text-xs font-medium">Total Komoditas</p>
-              <p className="text-2xl font-bold text-white mt-1">{totalKomoditas}</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-              <p className="text-white/60 text-xs font-medium">Rata-rata Harga</p>
-              <p className="text-2xl font-bold text-white mt-1">{formattedAverage}</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-              <p className="text-white/60 text-xs font-medium">Puncak Tertinggi</p>
-              <p className="text-2xl font-bold text-white mt-1">{formattedHighest}</p>
-            </div>
           </div>
         </div>
       </section>

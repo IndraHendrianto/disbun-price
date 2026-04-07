@@ -59,6 +59,7 @@ export default function TrenHargaPage() {
     : commodities.filter(c => c.name === selectedFilter);
 
   let maxPrice = 0, minPrice = 0, avgPrice = 0, changePercent = "0.0";
+  let highestCommodityName = '', lowestCommodityName = '';
   let chartW = 800, chartH = 300, padL = 80, padR = 40, padT = 40, padB = 50;
   let plotW = chartW - padL - padR, plotH = chartH - padT - padB;
   let yLabels: number[] = [], yTicks = 5, graphMax = 1;
@@ -67,6 +68,21 @@ export default function TrenHargaPage() {
   let linePath = "", areaPath = "";
 
   if (selectedFilter === 'Semua') {
+    const categories = ['Hortikultura', 'Perkebunan', 'Bibit Tanaman'];
+    statsData = categories.map(cat => {
+      const cats = commodities.filter(c => c.category === cat);
+      let maxCatPrice = 0;
+      let label = cat;
+      let subLabel = '';
+      if (cats.length > 0) {
+         maxCatPrice = Math.max(...cats.map(c => c.currentPrice));
+         const highestComm = cats.find(c => c.currentPrice === maxCatPrice);
+         label = highestComm ? highestComm.name : cat;
+         subLabel = cat;
+      }
+      return { label, subLabel, value: maxCatPrice };
+    });
+
     const total = commodities.length;
     const currentPrices = commodities.map((c: Commodity) => c.currentPrice);
     const previousPrices = commodities.map((c: Commodity) => c.previousPrice);
@@ -75,15 +91,15 @@ export default function TrenHargaPage() {
     minPrice = currentPrices.length > 0 ? Math.min(...currentPrices) : 0;
     avgPrice = currentPrices.length > 0 ? Math.round(currentPrices.reduce((a: number, b: number) => a + b, 0) / total) : 0;
 
+    const maxComm = commodities.find(c => c.currentPrice === maxPrice);
+    const minComm = commodities.find(c => c.currentPrice === minPrice);
+    highestCommodityName = maxComm ? maxComm.name : '';
+    lowestCommodityName = minComm ? minComm.name : '';
+
     const prevAvgPrice = previousPrices.length > 0 ? Math.round(previousPrices.reduce((a: number, b: number) => a + b, 0) / total) : 0;
     changePercent = prevAvgPrice > 0 ? ((avgPrice - prevAvgPrice) / prevAvgPrice * 100).toFixed(1) : "0.0";
     
-    statsData = [
-      { label: 'Terendah', value: minPrice },
-      { label: 'Rata-rata', value: avgPrice },
-      { label: 'Tertinggi', value: maxPrice }
-    ];
-    graphMax = maxPrice * 1.2 || 1;
+    graphMax = Math.max(1, ...statsData.map(d => d.value)) * 1.2;
     const yStep = graphMax / (yTicks - 1);
     yLabels = Array.from({ length: yTicks }, (_, i) => Math.round(i * yStep));
   } else {
@@ -92,7 +108,12 @@ export default function TrenHargaPage() {
     maxPrice = Math.max(...prices);
     minPrice = Math.min(...prices);
     avgPrice = Math.round(prices.reduce((a: number, b: number) => a + b, 0) / (prices.length || 1));
-    
+
+    const maxEntry = historyData.find(d => d.price === maxPrice);
+    const minEntry = historyData.find(d => d.price === minPrice);
+    highestCommodityName = maxEntry ? new Date(maxEntry.recorded_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+    lowestCommodityName = minEntry ? new Date(minEntry.recorded_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+
     const firstPrice = prices[0] || 0;
     const lastPrice = prices[prices.length - 1] || 0;
     changePercent = firstPrice > 0 ? ((lastPrice - firstPrice) / firstPrice * 100).toFixed(1) : "0.0";
@@ -150,8 +171,20 @@ export default function TrenHargaPage() {
             icon="trending_up"
             color="success"
           />
-          <StatCard title="Harga Tertinggi" value={formatRupiah(maxPrice)} icon="arrow_upward" color="warning" />
-          <StatCard title="Harga Terendah" value={formatRupiah(minPrice)} icon="arrow_downward" color="info" />
+          <StatCard
+            title="Harga Tertinggi"
+            value={formatRupiah(maxPrice)}
+            subtitle={highestCommodityName || undefined}
+            icon="arrow_upward"
+            color="warning"
+          />
+          <StatCard
+            title="Harga Terendah"
+            value={formatRupiah(minPrice)}
+            subtitle={lowestCommodityName || undefined}
+            icon="arrow_downward"
+            color="info"
+          />
         </div>
 
         {/* Chart Area */}
@@ -233,9 +266,14 @@ export default function TrenHargaPage() {
                           <text x={x + barWidth/2} y={y - 10} textAnchor="middle" className="fill-slate-600 font-bold" fontSize="12">
                             {formatRupiah(d.value)}
                           </text>
-                          <text x={x + barWidth/2} y={padT + plotH + 25} textAnchor="middle" className="fill-slate-500 font-semibold uppercase tracking-wider" fontSize="11">
+                          <text x={x + barWidth/2} y={padT + plotH + 25} textAnchor="middle" className="fill-slate-600 font-bold" fontSize="12">
                             {d.label}
                           </text>
+                          {d.subLabel && (
+                            <text x={x + barWidth/2} y={padT + plotH + 40} textAnchor="middle" className="fill-slate-400 font-semibold uppercase tracking-wider" fontSize="10">
+                              {d.subLabel}
+                            </text>
+                          )}
                         </g>
                       );
                     })}

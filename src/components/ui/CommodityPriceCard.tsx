@@ -60,6 +60,11 @@ export default function CommodityPriceCard({ commodity, variant = 'card' }: Comm
               <span className="text-xs text-[var(--text-tertiary)]">— stabil</span>
             )}
           </div>
+          {commodity.lastUpdated && (
+             <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5">
+               {new Date(commodity.lastUpdated).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+             </p>
+          )}
         </div>
       </div>
     );
@@ -116,10 +121,17 @@ export default function CommodityPriceCard({ commodity, variant = 'card' }: Comm
           </div>
         </div>
 
-        {/* Previous price */}
-        <p className="text-xs text-[var(--text-tertiary)] mt-2">
-          Sebelumnya: <span className="line-through">{formatRupiah(commodity.previousPrice)}</span>
-        </p>
+        {/* Previous price and last updated */}
+        <div className="flex items-center justify-between mt-2">
+          <p className="text-xs text-[var(--text-tertiary)]">
+            Sebelumnya: <span className="line-through">{formatRupiah(commodity.previousPrice)}</span>
+          </p>
+          {commodity.lastUpdated && (
+            <p className="text-[10px] text-[var(--text-tertiary)] bg-gray-100 px-2 py-0.5 rounded">
+              {new Date(commodity.lastUpdated).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

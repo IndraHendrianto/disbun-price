@@ -29,8 +29,8 @@ export interface StatCard {
   color: 'primary' | 'success' | 'warning' | 'info' | 'danger';
 }
 
-export interface WeeklyVisit {
-  week: string;
+export interface DailyVisit {
+  day: string;
   visits: number;
 }
 
@@ -258,18 +258,20 @@ export const ADMIN_COMMODITY_STATS: StatCard[] = [
 ];
 
 export const VISITOR_STATS: StatCard[] = [
-  { title: 'Total Kunjungan', value: '12,842', subtitle: 'Dibandingkan bulan lalu', change: 18.5, icon: 'visibility', color: 'primary' },
-  { title: 'Pengunjung Unik', value: '8,291', subtitle: '+12.3% dari bulan lalu', change: 12.3, icon: 'person', color: 'info' },
+  { title: 'Total Kunjungan', value: '12,842', subtitle: 'Dibandingkan hari sebelumnya', change: 18.5, icon: 'visibility', color: 'primary' },
+  { title: 'Pengunjung Unik', value: '8,291', subtitle: '+12.3% dari hari sebelumnya', change: 12.3, icon: 'person', color: 'info' },
   { title: 'Halaman/Sesi', value: '3.42', subtitle: '+5.1%', change: 5.1, icon: 'description', color: 'success' },
   { title: 'Waktu Rata-rata', value: '2m 34s', subtitle: '+8.7%', change: 8.7, icon: 'timer', color: 'warning' },
 ];
 
-export const WEEKLY_VISITS: WeeklyVisit[] = [
-  { week: 'Minggu 1', visits: 0 },
-  { week: 'Minggu 2', visits: 0 },
-  { week: 'Minggu 3', visits: 0 },
-  { week: 'Minggu 4', visits: 0 },
-  { week: 'Minggu 5', visits: 0 },
+export const DAILY_VISITS: DailyVisit[] = [
+  { day: 'Senin', visits: 0 },
+  { day: 'Selasa', visits: 0 },
+  { day: 'Rabu', visits: 0 },
+  { day: 'Kamis', visits: 0 },
+  { day: 'Jumat', visits: 0 },
+  { day: 'Sabtu', visits: 0 },
+  { day: 'Minggu', visits: 0 },
 ];
 
 // ============================================================

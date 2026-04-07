@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import StatCard from '@/components/ui/StatCard';
-import { WEEKLY_VISITS } from '@/lib/constants';
+import { DAILY_VISITS } from '@/lib/constants';
 import { supabase } from '@/lib/supabase';
 
 export default function StatistikPage() {
@@ -29,7 +29,7 @@ export default function StatistikPage() {
     };
   }, []);
 
-  const maxVisitsTemp = Math.max(...WEEKLY_VISITS.map((w) => w.visits));
+  const maxVisitsTemp = Math.max(...DAILY_VISITS.map((w) => w.visits));
   const maxVisits = maxVisitsTemp === 0 ? 1 : maxVisitsTemp;
 
   return (
@@ -62,8 +62,8 @@ export default function StatistikPage() {
              <span className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs font-bold border border-orange-200">Segera Datang</span>
            </div>
           <div className="px-6 py-4 border-b border-[var(--border-light)]">
-            <h2 className="text-base font-bold text-[var(--text-primary)]">Tren Kunjungan Mingguan</h2>
-            <p className="text-xs text-[var(--text-tertiary)]">5 minggu terakhir</p>
+            <h2 className="text-base font-bold text-[var(--text-primary)]">Tren Kunjungan Harian</h2>
+            <p className="text-xs text-[var(--text-tertiary)]">7 hari terakhir</p>
           </div>
           <div className="p-6">
             <svg viewBox="0 0 500 200" className="w-full h-auto" preserveAspectRatio="xMidYMid meet">
@@ -103,9 +103,9 @@ export default function StatistikPage() {
               ))}
 
               {/* X labels */}
-              {WEEKLY_VISITS.map((w, i) => (
-                <text key={i} x={80 + i * 90} y="192" textAnchor="middle" className="fill-[var(--text-tertiary)]" fontSize="9">
-                  {w.week}
+              {DAILY_VISITS.map((w, i) => (
+                <text key={i} x={50 + i * 65} y="192" textAnchor="middle" className="fill-[var(--text-tertiary)]" fontSize="9">
+                  {w.day}
                 </text>
               ))}
             </svg>
@@ -119,11 +119,11 @@ export default function StatistikPage() {
            </div>
           <div className="px-6 py-4 border-b border-[var(--border-light)]">
             <h2 className="text-base font-bold text-[var(--text-primary)]">Volume Kunjungan</h2>
-            <p className="text-xs text-[var(--text-tertiary)]">Per minggu</p>
+            <p className="text-xs text-[var(--text-tertiary)]">Per hari</p>
           </div>
           <div className="p-6">
             <div className="flex items-end gap-3 h-44">
-              {WEEKLY_VISITS.map((week, idx) => (
+              {DAILY_VISITS.map((week, idx) => (
                 <div key={idx} className="flex-1 flex flex-col items-center gap-2">
                   <span className="text-[10px] font-bold text-[var(--text-primary)]">
                     {(week.visits / 1000).toFixed(1)}K
@@ -137,7 +137,7 @@ export default function StatistikPage() {
                       {week.visits.toLocaleString()} kunjungan
                     </div>
                   </div>
-                  <span className="text-[10px] text-[var(--text-tertiary)]">{week.week}</span>
+                  <span className="text-[10px] text-[var(--text-tertiary)]">{week.day}</span>
                 </div>
               ))}
             </div>

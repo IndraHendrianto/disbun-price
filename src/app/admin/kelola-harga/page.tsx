@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import DataTable, { type Column } from '@/components/ui/DataTable';
@@ -89,6 +89,8 @@ const columns: Column<Commodity>[] = [
 
 export default function KelolaHargaPage() {
   const [data, setData] = useState<Commodity[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterCategory, setFilterCategory] = useState('Semua');
 
   const fetchCommodities = async () => {
     const { data: items } = await supabase.from('commodities').select('*');
@@ -117,6 +119,14 @@ export default function KelolaHargaPage() {
     };
   }, []);
 
+  const filteredData = useMemo(() => {
+    return data.filter((c) => {
+      const matchSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchCategory = filterCategory === 'Semua' || c.category === filterCategory;
+      return matchSearch && matchCategory;
+    });
+  }, [data, searchQuery, filterCategory]);
+
   return (
     <div className="animate-fade-in">
       {/* Page Header */}
@@ -133,14 +143,16 @@ export default function KelolaHargaPage() {
         <SearchFilter
           searchPlaceholder="Cari komoditas..."
           categories={['Hortikultura', 'Perkebunan', 'Bibit Tanaman']}
+          onSearch={setSearchQuery}
+          onFilter={setFilterCategory}
         />
       </div>
 
       {/* Data Table */}
       <DataTable
         columns={columns}
-        data={data}
-        totalItems={data.length}
+        data={filteredData}
+        totalItems={filteredData.length}
         itemsPerPage={10}
         currentPage={1}
         caption="Kelola harga komoditas"

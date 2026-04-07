@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import StatCard from '@/components/ui/StatCard';
 import DataTable, { type Column } from '@/components/ui/DataTable';
@@ -12,6 +12,8 @@ import { COMMODITIES, type Commodity } from '@/lib/constants';
 export default function KelolaKomoditasPage() {
   const [data, setData] = useState<Commodity[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<Commodity | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterCategory, setFilterCategory] = useState('Semua');
 
   const fetchCommodities = async () => {
     const { data: items } = await supabase.from('commodities').select('*');
@@ -39,6 +41,14 @@ export default function KelolaKomoditasPage() {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  const filteredData = useMemo(() => {
+    return data.filter((c) => {
+      const matchSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchCategory = filterCategory === 'Semua' || c.category === filterCategory;
+      return matchSearch && matchCategory;
+    });
+  }, [data, searchQuery, filterCategory]);
 
   const handleMigrasi = async () => {
     try {
@@ -179,14 +189,16 @@ export default function KelolaKomoditasPage() {
         <SearchFilter
           searchPlaceholder="Cari komoditas..."
           categories={['Hortikultura', 'Perkebunan', 'Bibit Tanaman']}
+          onSearch={setSearchQuery}
+          onFilter={setFilterCategory}
         />
       </div>
 
       {/* Data Table */}
       <DataTable
         columns={columns}
-        data={data}
-        totalItems={data.length}
+        data={filteredData}
+        totalItems={filteredData.length}
         itemsPerPage={10}
         currentPage={1}
         caption="Kelola jenis komoditas"

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import DataTable, { type Column } from '@/components/ui/DataTable';
 import Badge from '@/components/ui/Badge';
@@ -86,6 +86,8 @@ const columns: Column<Commodity>[] = [
 
 export default function ClientDaftarHarga() {
   const [data, setData] = useState<Commodity[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterCategory, setFilterCategory] = useState('Semua');
 
   const fetchCommodities = async () => {
     const { data: items } = await supabase.from('commodities').select('*');
@@ -114,6 +116,14 @@ export default function ClientDaftarHarga() {
     };
   }, []);
 
+  const filteredData = useMemo(() => {
+    return data.filter((c) => {
+      const matchSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchCategory = filterCategory === 'Semua' || c.category === filterCategory;
+      return matchSearch && matchCategory;
+    });
+  }, [data, searchQuery, filterCategory]);
+
   return (
     <div className="animate-fade-in">
       {/* Header */}
@@ -124,7 +134,7 @@ export default function ClientDaftarHarga() {
           </h1>
           <p className="text-sm text-[var(--text-secondary)] max-w-2xl mb-6">
             Akses transparan ke data pasar hortikultura dan perkebunan terbaru di Sulawesi Tenggara.
-            Kami menyajikan kurasi harga harian untuk mendukung stabilitas ekonomi daerah.
+            Kami menyajikan kurasi harga rata-rata dari pasar tradisional kota Kendari untuk mendukung stabilitas ekonomi daerah.
           </p>
 
           <div className="flex items-center gap-2 text-xs text-[var(--text-tertiary)]">
@@ -139,7 +149,7 @@ export default function ClientDaftarHarga() {
         <h2 className="text-lg font-bold text-[var(--text-primary)] mb-4">Indeks Harga Pasar</h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-8">
-          {data.slice(0, 5).map((c) => {
+          {filteredData.slice(0, 5).map((c) => {
             const { percentage, direction } = getPriceChange(c.currentPrice, c.previousPrice);
             return (
               <div key={c.id} className="bg-white rounded-xl border border-[var(--border-light)] p-4 hover:shadow-md transition-all duration-200">
@@ -168,14 +178,16 @@ export default function ClientDaftarHarga() {
           <SearchFilter
             searchPlaceholder="Cari komoditas..."
             categories={['Hortikultura', 'Perkebunan', 'Bibit Tanaman']}
+            onSearch={setSearchQuery}
+            onFilter={setFilterCategory}
           />
         </div>
 
         {/* Data Table */}
         <DataTable
           columns={columns}
-          data={data}
-          totalItems={data.length}
+          data={filteredData}
+          totalItems={filteredData.length}
           itemsPerPage={10}
           currentPage={1}
           caption="Daftar harga komoditas unggulan Sulawesi Tenggara"
