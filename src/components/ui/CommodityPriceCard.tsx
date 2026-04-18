@@ -42,6 +42,11 @@ export default function CommodityPriceCard({ commodity, variant = 'card' }: Comm
 
   const rawDate = new Date(commodity.lastUpdated);
   const isValidDate = commodity.lastUpdated && !isNaN(rawDate.getTime());
+  const displayDate = commodity.lastUpdated 
+    ? (isValidDate 
+      ? rawDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) 
+      : commodity.lastUpdated.split(/ pukul /i)[0].trim())
+    : '';
 
   if (variant === 'compact') {
     return (
@@ -65,7 +70,7 @@ export default function CommodityPriceCard({ commodity, variant = 'card' }: Comm
           </div>
           {commodity.lastUpdated && (
              <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5">
-               {isValidDate ? rawDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : commodity.lastUpdated}
+               {displayDate}
              </p>
           )}
         </div>
@@ -131,7 +136,7 @@ export default function CommodityPriceCard({ commodity, variant = 'card' }: Comm
           </p>
           {commodity.lastUpdated && (
             <p className="text-[10px] text-[var(--text-tertiary)] bg-gray-100 px-2 py-0.5 rounded">
-              {isValidDate ? rawDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : commodity.lastUpdated}
+              {displayDate}
             </p>
           )}
         </div>

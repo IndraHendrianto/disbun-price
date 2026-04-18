@@ -133,17 +133,19 @@ export default function StatistikPage() {
           <div className="p-6">
             <div className="flex items-end gap-3 h-44">
               {syncedDailyVisits.map((week, idx) => (
-                <div key={idx} className="flex-1 flex flex-col items-center gap-2">
+                <div key={idx} className="flex-1 h-full flex flex-col items-center justify-end gap-2">
                   <span className="text-[10px] font-bold text-[var(--text-primary)]">
                     {week.visits >= 1000 ? `${(week.visits / 1000).toFixed(1)}K` : week.visits}
                   </span>
-                  <div
-                    className="w-full rounded-t-lg bg-gradient-to-t from-emerald-500 to-green-400 transition-all duration-500 hover:from-emerald-600 hover:to-green-500 cursor-pointer relative group"
-                    style={{ height: `${Math.max(5, (week.visits / maxVisits) * 100)}%` }}
-                  >
-                    {/* Tooltip on hover */}
-                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-20">
-                      {week.visits.toLocaleString('id-ID')} kunjungan
+                  <div className="flex-1 w-full flex items-end justify-center relative">
+                    <div
+                      className="w-full rounded-t-lg bg-gradient-to-t from-emerald-500 to-green-400 transition-all duration-500 hover:from-emerald-600 hover:to-green-500 cursor-pointer group"
+                      style={{ height: `${Math.max(5, (week.visits / maxVisits) * 100)}%` }}
+                    >
+                      {/* Tooltip on hover */}
+                      <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-20">
+                        {week.visits.toLocaleString('id-ID')} kunjungan
+                      </div>
                     </div>
                   </div>
                   <span className="text-[10px] text-[var(--text-tertiary)]">{week.day}</span>
