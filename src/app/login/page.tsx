@@ -6,8 +6,8 @@ import { supabase } from '@/lib/supabase';
 import Cookies from 'js-cookie';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('disbun@gmail.com');
-  const [password, setPassword] = useState('disbun123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -57,7 +57,7 @@ export default function LoginPage() {
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-5">
+          <form onSubmit={handleLogin} className="space-y-5" autoComplete="off">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
               <div className="relative">

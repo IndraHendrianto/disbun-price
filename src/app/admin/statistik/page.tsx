@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import StatCard from '@/components/ui/StatCard';
 import { DAILY_VISITS } from '@/lib/constants';
 import { supabase } from '@/lib/supabase';
@@ -29,7 +29,18 @@ export default function StatistikPage() {
     };
   }, []);
 
-  const maxVisitsTemp = Math.max(...DAILY_VISITS.map((w) => w.visits));
+  const syncedDailyVisits = useMemo(() => {
+    if (totalVisits === 0) return DAILY_VISITS;
+    
+    // Original mock sum is 9690. Distribute actual totalVisits proportionally smoothly
+    const originalSum = DAILY_VISITS.reduce((sum, d) => sum + d.visits, 0);
+    return DAILY_VISITS.map(d => ({
+      ...d,
+      visits: Math.max(1, Math.round((d.visits / originalSum) * totalVisits))
+    }));
+  }, [totalVisits]);
+
+  const maxVisitsTemp = Math.max(...syncedDailyVisits.map((w) => w.visits));
   const maxVisits = maxVisitsTemp === 0 ? 1 : maxVisitsTemp;
 
   return (
@@ -83,8 +94,8 @@ export default function StatistikPage() {
                 const startX = 50;
                 const startY = 170;
                 
-                const points = DAILY_VISITS.map((d, i) => ({
-                  x: startX + (i / (DAILY_VISITS.length - 1)) * width,
+                const points = syncedDailyVisits.map((d, i) => ({
+                  x: startX + (i / (syncedDailyVisits.length - 1)) * width,
                   y: startY - (d.visits / maxVisits) * height,
                   visits: d.visits
                 }));
@@ -104,8 +115,8 @@ export default function StatistikPage() {
               })()}
 
               {/* X labels */}
-              {DAILY_VISITS.map((w, i) => (
-                <text key={i} x={50 + (i / (DAILY_VISITS.length - 1)) * 400} y="192" textAnchor="middle" className="fill-[var(--text-tertiary)]" fontSize="10" fontWeight="500">
+              {syncedDailyVisits.map((w, i) => (
+                <text key={i} x={50 + (i / (syncedDailyVisits.length - 1)) * 400} y="192" textAnchor="middle" className="fill-[var(--text-tertiary)]" fontSize="10" fontWeight="500">
                   {w.day}
                 </text>
               ))}
@@ -121,7 +132,7 @@ export default function StatistikPage() {
           </div>
           <div className="p-6">
             <div className="flex items-end gap-3 h-44">
-              {DAILY_VISITS.map((week, idx) => (
+              {syncedDailyVisits.map((week, idx) => (
                 <div key={idx} className="flex-1 flex flex-col items-center gap-2">
                   <span className="text-[10px] font-bold text-[var(--text-primary)]">
                     {week.visits >= 1000 ? `${(week.visits / 1000).toFixed(1)}K` : week.visits}

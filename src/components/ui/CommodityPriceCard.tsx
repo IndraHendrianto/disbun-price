@@ -40,6 +40,9 @@ export default function CommodityPriceCard({ commodity, variant = 'card' }: Comm
   const { percentage, direction } = getPriceChange(commodity.currentPrice, commodity.previousPrice);
   const categoryColor = CATEGORY_COLORS[commodity.category];
 
+  const rawDate = new Date(commodity.lastUpdated);
+  const isValidDate = commodity.lastUpdated && !isNaN(rawDate.getTime());
+
   if (variant === 'compact') {
     return (
       <div className="group flex items-center gap-4 bg-white rounded-lg border border-[var(--border-light)] px-4 py-3 hover:shadow-md transition-all duration-200 hover:border-[var(--primary)] cursor-default">
@@ -60,9 +63,9 @@ export default function CommodityPriceCard({ commodity, variant = 'card' }: Comm
               <span className="text-xs text-[var(--text-tertiary)]">— stabil</span>
             )}
           </div>
-          {commodity.lastUpdated && (
+          {isValidDate && (
              <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5">
-               {new Date(commodity.lastUpdated).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+               {rawDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
              </p>
           )}
         </div>
@@ -126,9 +129,9 @@ export default function CommodityPriceCard({ commodity, variant = 'card' }: Comm
           <p className="text-xs text-[var(--text-tertiary)]">
             Sebelumnya: <span className="line-through">{formatRupiah(commodity.previousPrice)}</span>
           </p>
-          {commodity.lastUpdated && (
+          {isValidDate && (
             <p className="text-[10px] text-[var(--text-tertiary)] bg-gray-100 px-2 py-0.5 rounded">
-              {new Date(commodity.lastUpdated).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+              {rawDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
             </p>
           )}
         </div>
