@@ -63,9 +63,9 @@ export default function CommodityPriceCard({ commodity, variant = 'card' }: Comm
               <span className="text-xs text-[var(--text-tertiary)]">— stabil</span>
             )}
           </div>
-          {isValidDate && (
+          {commodity.lastUpdated && (
              <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5">
-               {rawDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+               {isValidDate ? rawDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : commodity.lastUpdated}
              </p>
           )}
         </div>
@@ -129,9 +129,9 @@ export default function CommodityPriceCard({ commodity, variant = 'card' }: Comm
           <p className="text-xs text-[var(--text-tertiary)]">
             Sebelumnya: <span className="line-through">{formatRupiah(commodity.previousPrice)}</span>
           </p>
-          {isValidDate && (
+          {commodity.lastUpdated && (
             <p className="text-[10px] text-[var(--text-tertiary)] bg-gray-100 px-2 py-0.5 rounded">
-              {rawDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+              {isValidDate ? rawDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : commodity.lastUpdated}
             </p>
           )}
         </div>
