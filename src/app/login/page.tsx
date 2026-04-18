@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import Cookies from 'js-cookie';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -110,6 +111,16 @@ export default function LoginPage() {
               )}
             </button>
           </form>
+          
+          <div className="mt-5">
+            <Link
+              href="/"
+              className="w-full py-2.5 px-4 bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 font-medium rounded-lg transition-all flex items-center justify-center gap-2 text-sm"
+            >
+              <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+              Kembali ke Beranda
+            </Link>
+          </div>
           
           <div className="mt-8 text-center text-sm text-gray-500">
             &copy; {new Date().getFullYear()} DISBUNHORTI Sulawesi Tenggara
