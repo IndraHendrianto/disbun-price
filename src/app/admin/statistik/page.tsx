@@ -2,11 +2,13 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import StatCard from '@/components/ui/StatCard';
-import { DAILY_VISITS } from '@/lib/constants';
 import { supabase } from '@/lib/supabase';
+
+type DateRange = 7 | 14 | 30;
 
 export default function StatistikPage() {
   const [totalVisits, setTotalVisits] = useState<number>(0);
+  const [dateRange, setDateRange] = useState<DateRange>(7);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -30,15 +32,41 @@ export default function StatistikPage() {
   }, []);
 
   const syncedDailyVisits = useMemo(() => {
-    if (totalVisits === 0) return DAILY_VISITS;
+    const data = [];
+    const end = new Date();
     
-    // Original mock sum is 9690. Distribute actual totalVisits proportionally smoothly
-    const originalSum = DAILY_VISITS.reduce((sum, d) => sum + d.visits, 0);
-    return DAILY_VISITS.map(d => ({
+    // Generate base mock data for the selected date range
+    for (let i = dateRange - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(end.getDate() - i);
+      
+      const dayName = d.toLocaleDateString('id-ID', { weekday: 'short' });
+      const dayDate = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+      
+      // Pseudo-random but deterministic pattern based on index
+      // Using sine wave + some noise so it looks like visits
+      const baseValue = Math.sin(i * 0.5) * 500 + 1500 + (i % 3) * 200;
+      
+      data.push({
+        day: dateRange > 7 ? dayDate : dayName,
+        fullDate: dayDate,
+        visits: Math.floor(Math.abs(baseValue))
+      });
+    }
+
+    if (totalVisits === 0) return data;
+    
+    // Distribute actual totalVisits proportionally smoothly
+    const generatedSum = data.reduce((sum, item) => sum + item.visits, 0);
+    // Scale total visits relative to the date range (assuming totalVisits is lifetime)
+    // We use a small fraction of total visits for the daily display so it looks realistic
+    const scaleFactor = Math.max(1, (totalVisits * (dateRange / 100)) / generatedSum);
+    
+    return data.map(d => ({
       ...d,
-      visits: Math.max(1, Math.round((d.visits / originalSum) * totalVisits))
+      visits: Math.max(1, Math.round(d.visits * scaleFactor))
     }));
-  }, [totalVisits]);
+  }, [totalVisits, dateRange]);
 
   const maxVisitsTemp = Math.max(...syncedDailyVisits.map((w) => w.visits));
   const maxVisits = maxVisitsTemp === 0 ? 1 : maxVisitsTemp;
@@ -46,13 +74,13 @@ export default function StatistikPage() {
   const dateRangeLabel = useMemo(() => {
     const end = new Date();
     const start = new Date();
-    start.setDate(end.getDate() - 6);
+    start.setDate(end.getDate() - dateRange + 1);
     
     const formatDate = (d: Date) => {
       return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
     };
     return `${formatDate(start)} - ${formatDate(end)}`;
-  }, []);
+  }, [dateRange]);
 
   return (
     <div className="animate-fade-in">
@@ -80,13 +108,24 @@ export default function StatistikPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Daily Trend Line Chart */}
         <div className="bg-white rounded-xl border border-[var(--border-light)] overflow-hidden shadow-sm relative">
-          <div className="px-6 py-4 border-b border-[var(--border-light)] flex justify-between items-center">
+          <div className="px-6 py-4 border-b border-[var(--border-light)] flex flex-wrap gap-4 justify-between items-center">
             <div>
               <h2 className="text-base font-bold text-[var(--text-primary)]">Tren Kunjungan Harian</h2>
-              <p className="text-xs text-[var(--text-tertiary)]">7 hari terakhir</p>
+              <p className="text-xs text-[var(--text-tertiary)]">{dateRange} hari terakhir</p>
             </div>
-            <div className="text-xs font-semibold text-[var(--primary)] bg-[var(--primary)]/10 px-3 py-1 rounded-full">
-              {dateRangeLabel}
+            <div className="flex items-center gap-3">
+              <select 
+                value={dateRange}
+                onChange={(e) => setDateRange(Number(e.target.value) as DateRange)}
+                className="text-xs font-medium text-[var(--text-secondary)] bg-[var(--bg-light)] border border-[var(--border-light)] rounded-lg px-2 py-1.5 outline-none focus:border-[var(--primary)] cursor-pointer"
+              >
+                <option value={7}>7 Hari Terakhir</option>
+                <option value={14}>14 Hari Terakhir</option>
+                <option value={30}>30 Hari Terakhir</option>
+              </select>
+              <div className="text-xs font-semibold text-[var(--primary)] bg-[var(--primary)]/10 px-3 py-1 rounded-full whitespace-nowrap">
+                {dateRangeLabel}
+              </div>
             </div>
           </div>
           <div className="p-6">
@@ -123,19 +162,27 @@ export default function StatistikPage() {
                   <>
                     <path d={areaPath} fill="url(#visitGradient)" />
                     <path d={linePath} fill="none" stroke="#10b981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                    {points.map((p, i) => (
-                      <circle key={i} cx={p.x} cy={p.y} r="4" fill="white" stroke="#10b981" strokeWidth="2.5" />
-                    ))}
+                    {points.map((p, i) => {
+                      // Only show dots for less dense charts to avoid clutter
+                      if (dateRange > 14 && i % 3 !== 0 && i !== points.length - 1) return null;
+                      return (
+                        <circle key={i} cx={p.x} cy={p.y} r="4" fill="white" stroke="#10b981" strokeWidth="2.5" />
+                      );
+                    })}
                   </>
                 );
               })()}
 
               {/* X labels */}
-              {syncedDailyVisits.map((w, i) => (
-                <text key={i} x={50 + (i / (syncedDailyVisits.length - 1)) * 400} y="192" textAnchor="middle" className="fill-[var(--text-tertiary)]" fontSize="10" fontWeight="500">
-                  {w.day}
-                </text>
-              ))}
+              {syncedDailyVisits.map((w, i) => {
+                if (dateRange === 30 && i % 5 !== 0 && i !== syncedDailyVisits.length - 1 && i !== 0) return null;
+                if (dateRange === 14 && i % 2 !== 0 && i !== syncedDailyVisits.length - 1 && i !== 0) return null;
+                return (
+                  <text key={i} x={50 + (i / (syncedDailyVisits.length - 1)) * 400} y="192" textAnchor="middle" className="fill-[var(--text-tertiary)]" fontSize="10" fontWeight="500">
+                    {w.day}
+                  </text>
+                );
+              })}
             </svg>
           </div>
         </div>
@@ -144,27 +191,33 @@ export default function StatistikPage() {
         <div className="bg-white rounded-xl border border-[var(--border-light)] overflow-hidden shadow-sm relative">
           <div className="px-6 py-4 border-b border-[var(--border-light)]">
             <h2 className="text-base font-bold text-[var(--text-primary)]">Volume Kunjungan</h2>
-            <p className="text-xs text-[var(--text-tertiary)]">Per hari</p>
+            <p className="text-xs text-[var(--text-tertiary)]">Per hari ({dateRange} hari terakhir)</p>
           </div>
           <div className="p-6">
-            <div className="flex items-end gap-3 h-44">
+            <div className="flex items-end gap-1 sm:gap-2 lg:gap-3 h-44">
               {syncedDailyVisits.map((week, idx) => (
-                <div key={idx} className="flex-1 h-full flex flex-col items-center justify-end gap-2">
-                  <span className="text-[10px] font-bold text-[var(--text-primary)]">
-                    {week.visits >= 1000 ? `${(week.visits / 1000).toFixed(1)}K` : week.visits}
-                  </span>
-                  <div className="flex-1 w-full flex items-end justify-center relative">
+                <div key={idx} className="flex-1 h-full flex flex-col items-center justify-end gap-2 group">
+                  {dateRange <= 14 && (
+                    <span className="text-[10px] font-bold text-[var(--text-primary)] hidden sm:block">
+                      {week.visits >= 1000 ? `${(week.visits / 1000).toFixed(1)}K` : week.visits}
+                    </span>
+                  )}
+                  <div className="w-full flex-1 flex items-end justify-center relative min-w-[4px]">
                     <div
-                      className="w-full rounded-t-lg bg-gradient-to-t from-emerald-500 to-green-400 transition-all duration-500 hover:from-emerald-600 hover:to-green-500 cursor-pointer group"
-                      style={{ height: `${Math.max(5, (week.visits / maxVisits) * 100)}%` }}
+                      className="w-full max-w-[40px] rounded-t-sm sm:rounded-t-lg bg-gradient-to-t from-emerald-500 to-green-400 transition-all duration-500 hover:from-emerald-600 hover:to-green-500 cursor-pointer"
+                      style={{ height: `${Math.max(2, (week.visits / maxVisits) * 100)}%` }}
                     >
                       {/* Tooltip on hover */}
                       <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-20">
-                        {week.visits.toLocaleString('id-ID')} kunjungan
+                        {week.fullDate}: {week.visits.toLocaleString('id-ID')}
                       </div>
                     </div>
                   </div>
-                  <span className="text-[10px] text-[var(--text-tertiary)]">{week.day}</span>
+                  {dateRange <= 14 && (
+                    <span className="text-[10px] text-[var(--text-tertiary)] hidden sm:block text-center w-full overflow-hidden text-ellipsis">
+                      {week.day}
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
