@@ -43,6 +43,17 @@ export default function StatistikPage() {
   const maxVisitsTemp = Math.max(...syncedDailyVisits.map((w) => w.visits));
   const maxVisits = maxVisitsTemp === 0 ? 1 : maxVisitsTemp;
 
+  const dateRangeLabel = useMemo(() => {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - 6);
+    
+    const formatDate = (d: Date) => {
+      return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+    };
+    return `${formatDate(start)} - ${formatDate(end)}`;
+  }, []);
+
   return (
     <div className="animate-fade-in">
       {/* Page Header */}
@@ -69,9 +80,14 @@ export default function StatistikPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Daily Trend Line Chart */}
         <div className="bg-white rounded-xl border border-[var(--border-light)] overflow-hidden shadow-sm relative">
-          <div className="px-6 py-4 border-b border-[var(--border-light)]">
-            <h2 className="text-base font-bold text-[var(--text-primary)]">Tren Kunjungan Harian</h2>
-            <p className="text-xs text-[var(--text-tertiary)]">7 hari terakhir</p>
+          <div className="px-6 py-4 border-b border-[var(--border-light)] flex justify-between items-center">
+            <div>
+              <h2 className="text-base font-bold text-[var(--text-primary)]">Tren Kunjungan Harian</h2>
+              <p className="text-xs text-[var(--text-tertiary)]">7 hari terakhir</p>
+            </div>
+            <div className="text-xs font-semibold text-[var(--primary)] bg-[var(--primary)]/10 px-3 py-1 rounded-full">
+              {dateRangeLabel}
+            </div>
           </div>
           <div className="p-6">
             <svg viewBox="0 0 500 200" className="w-full h-auto" preserveAspectRatio="xMidYMid meet">

@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import CommodityPriceCard from '@/components/ui/CommodityPriceCard';
 import StatCard from '@/components/ui/StatCard';
+import SearchFilter from '@/components/ui/SearchFilter';
 import {
   CATEGORY_COLORS,
   LAST_UPDATE,
@@ -25,6 +26,7 @@ const CATEGORY_DESCRIPTIONS: Record<CommodityCategory, string> = {
 
 export default function DashboardHome() {
   const [commodities, setCommodities] = useState<Commodity[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchCommodities = async () => {
     const { data: items } = await supabase.from('commodities').select('*');
@@ -68,12 +70,15 @@ export default function DashboardHome() {
   const highestPrice = totalKomoditas > 0 ? Math.max(...commodities.map(c => c.currentPrice)) : 0;
 
   const commoditiesByCategory = useMemo(() => {
-    return commodities.reduce((acc, c) => {
+    const filtered = commodities.filter(c => 
+      c.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    return filtered.reduce((acc, c) => {
       if (!acc[c.category]) acc[c.category] = [];
       acc[c.category].push(c);
       return acc;
     }, {} as Record<CommodityCategory, Commodity[]>);
-  }, [commodities]);
+  }, [commodities, searchQuery]);
 
   const formattedAverage = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(averagePrice);
   const formattedHighest = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(highestPrice);
@@ -99,6 +104,16 @@ export default function DashboardHome() {
               di wilayah Sulawesi Tenggara. Data diperbarui secara berkala oleh Dinas Perkebunan dan Hortikultura.
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* Search Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-10 mb-8 mt-2">
+        <div className="bg-white rounded-xl shadow-md border border-[var(--border-light)] p-2 sm:p-4">
+          <SearchFilter 
+            searchPlaceholder="Cari komoditas (contoh: Cabai, Bawang...)"
+            onSearch={setSearchQuery} 
+          />
         </div>
       </section>
 
