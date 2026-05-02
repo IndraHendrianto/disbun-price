@@ -43,29 +43,20 @@ export default function StatistikPage() {
       const dayName = d.toLocaleDateString('id-ID', { weekday: 'short' });
       const dayDate = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
       
-      // Pseudo-random but deterministic pattern based on index
-      // Using sine wave + some noise so it looks like visits
-      const baseValue = Math.sin(i * 0.5) * 500 + 1500 + (i % 3) * 200;
+      // Generate kunjungan harian yang terkoneksi dengan totalVisits
+      const fraction = (Math.sin(i * 0.5) + 1.5) / 2.5; // Angka antara 0.2 dan 1.0
+      
+      // Estimasikan rata-rata kunjungan per hari (misal 1/30 dari total)
+      const avgDaily = Math.max(1, totalVisits / 30);
       
       data.push({
         day: dateRange > 7 ? dayDate : dayName,
         fullDate: dayDate,
-        visits: Math.floor(Math.abs(baseValue))
+        visits: totalVisits === 0 ? 0 : Math.max(1, Math.floor(fraction * avgDaily))
       });
     }
 
-    if (totalVisits === 0) return data;
-    
-    // Distribute actual totalVisits proportionally smoothly
-    const generatedSum = data.reduce((sum, item) => sum + item.visits, 0);
-    // Scale total visits relative to the date range (assuming totalVisits is lifetime)
-    // We use a small fraction of total visits for the daily display so it looks realistic
-    const scaleFactor = Math.max(1, (totalVisits * (dateRange / 100)) / generatedSum);
-    
-    return data.map(d => ({
-      ...d,
-      visits: Math.max(1, Math.round(d.visits * scaleFactor))
-    }));
+    return data;
   }, [totalVisits, dateRange]);
 
   const maxVisitsTemp = Math.max(...syncedDailyVisits.map((w) => w.visits));
@@ -199,7 +190,7 @@ export default function StatistikPage() {
                 <div key={idx} className="flex-1 h-full flex flex-col items-center justify-end gap-2 group">
                   {dateRange <= 14 && (
                     <span className="text-[10px] font-bold text-[var(--text-primary)] hidden sm:block">
-                      {week.visits >= 1000 ? `${(week.visits / 1000).toFixed(1)}K` : week.visits}
+                      {week.visits.toLocaleString('id-ID')}
                     </span>
                   )}
                   <div className="w-full flex-1 flex items-end justify-center relative min-w-[4px]">

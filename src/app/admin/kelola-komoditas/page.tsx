@@ -178,10 +178,11 @@ export default function KelolaKomoditasPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 stagger-children">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 stagger-children">
         <StatCard title="Total Jenis" value={data.length} icon="category" color="primary" />
         <StatCard title="Hortikultura" value={data.filter(c => c.category === 'Hortikultura').length} icon="eco" color="success" />
         <StatCard title="Perkebunan" value={data.filter(c => c.category === 'Perkebunan').length} icon="forest" color="warning" />
+        <StatCard title="Bibit Tanaman" value={data.filter(c => c.category === 'Bibit Tanaman').length} icon="potted_plant" color="info" />
       </div>
 
       {/* Search & Filter */}
